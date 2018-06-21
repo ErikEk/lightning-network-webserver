@@ -50,19 +50,16 @@ var (
 )
 
 func fatal(err error) {
-	fmt.Fprintf(os.Stderr, "[chat-backend] %v\n", err)
+	fmt.Fprintf(os.Stderr, "[LNSite] %v\n", err)
 	os.Exit(1)
 }
 
 func getClient() (lnrpc.LightningClient, func()) {
-	fmt.Println("asdas3332d")
-	fmt.Println(defaultLndDir)
 	conn := getClientConn()
 
 	cleanUp := func() {
 		conn.Close()
 	}
-	fmt.Println("asdas555d")
 	return lnrpc.NewLightningClient(conn), cleanUp
 }
 
