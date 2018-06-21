@@ -141,27 +141,8 @@ func getClientConn() *grpc.ClientConn {
 	return conn
 }
 
-func outputInvoice(w http.ResponseWriter, r *http.Request) {
-	message := r.URL.Path
-	message = strings.TrimPrefix(message, "/")
-	if(message=="test") {
-		fmt.Println("test")
-		w.Write([]byte(message))
-	}
-	message = "Hello " + message
-	w.Write([]byte(message))
-
-}
-func startHTTPServer() {
-	http.HandleFunc("/", outputInvoice)
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-    	panic(err)
-  	}
-}
 
 func main() {
-
-	//startHTTPServer()
 
 	tlsCertFlag := flag.String("tlsCert", defaultTLSCertPath, "path for the certificate used by the lnd server.")
 	rpcMacaroonFlag := flag.String("macaroon", defaultMacaroonPath, " path for the macaroon.")
@@ -240,7 +221,6 @@ func main() {
 		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), api.MakeHandler()))
 	}
 	*/
-	
 
 	if httpEnabled {
 		mux := http.NewServeMux()
@@ -254,17 +234,13 @@ func main() {
 	}
 }
 func getIndex(w http.ResponseWriter, r *http.Request) {
-	title := "asdas"
-    fmt.Println(title,"---")
-	p, _ := loadIndexData(title,w,r)
-    t, _ := template.ParseFiles("testtemplate.html")
+	p, _ := loadIndexData(w,r)
+    t, _ := template.ParseFiles("templates/testtemplate.html")
     t.Execute(w, p)
 }
 func getInvoice(w http.ResponseWriter, r *http.Request) {
-	title := "asdas"
-    fmt.Println(title,"---")
-	p, _ := loadInvoiceData(title,w,r)
-    t, _ := template.ParseFiles("getInvoice.html")
+	p, _ := loadInvoiceData(w,r)
+    t, _ := template.ParseFiles("templates/getInvoice.html")
     t.Execute(w, p)
 }
 func init() {

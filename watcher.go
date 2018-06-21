@@ -4,7 +4,7 @@ import (
 	"fmt"
 	//"log"
 	"time"
-	//"reflect"
+	"reflect"
 	//"cloud.google.com/go/firestore"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"golang.org/x/net/context"
@@ -44,13 +44,13 @@ func checkPayments() {
 	//}
 	//for _, s := range snapshot {
 		//invoice := s.Data()["invoice"].(string)
-	invoice := "lntb69690n1pdjgw2wpp5xakfaufhth55srq03mfnrj800q0dkx7aaxeuvhky4s236405676qdqagysxxmmxvejk2grxdaezq5n0vajhycqzys0set6gt5lm3p4lnz5d3dv8cx4cqayzjzupe0r55g9h4nrmd6jt2hvhccnu42pg9wlla3zqgtx0fv7ewlw6tlmxvjz4cut3k0x4ykc4cp03f6vn"
+	invoice := "lntb1u1pdjhu85pp54syzp8ppm3ax0xprctgl0lf6ztss4zfykmgffan8c7wwgnathahqdq9wdjxzcqzyschmd8lft5kjfjs4k6w3075f5vuah3aeksju336nmt8nume2vepkjh4hw7yc50kn6t7v7syqyl64s5vsqrq8vrwmpcwnvw3udugustvgq94uwes"
 	
 	decoded, err := c.DecodePayReq(context.Background(), &lnrpc.PayReqString{PayReq: invoice})
-	//res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
-	//fmt.Println(res)
-	//fmt.Println(decoded.GetPaymentHash())
-	//fmt.Println(reflect.TypeOf(decoded))
+	res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
+	fmt.Println(res)
+	fmt.Println(decoded.GetPaymentHash())
+	fmt.Println(reflect.TypeOf(decoded))
 	if err != nil {
 		fmt.Println("Failed to decode payreq")
 		//continue
@@ -63,7 +63,7 @@ func checkPayments() {
 		fmt.Println("Failed to find invoice ", err)
 	}
 
-	//fmt.Println("--",lnInvoice.GetSettled())
+	fmt.Println("--",lnInvoice.GetSettled())
 	//fmt.Println(lnInvoice)
 	//fmt.Println(lnInvoice.GetValue())
 	//fmt.Println(lnInvoice.GetPaymentRequest())
