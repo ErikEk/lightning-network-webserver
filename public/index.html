@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Chat</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/emojione/2.2.6/assets/css/emojione.min.css"/>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript">
+            function generateBarCode()
+            {
+                var nric = $('#text').val();
+                var url = 'https://api.qrserver.com/v1/create-qr-code/?data=' + nric + '&amp;size=256x256';
+                $('#barcode').attr('src', url);
+            }
+        </script>
+</head>
+<body>
+
+<script type="text/x-template" id="modal-template">
+
+  <transition name="modal">
+    <div class="modal-mask">
+      <div class="modal-wrapper">
+        <div class="modal-container">
+
+          <div class="modal-header">
+            <slot name="header">
+              Pay 5 satoshis:
+            </slot>
+          </div>
+
+          <div class="modal-body">
+            <slot name="body">
+              <img id='barcode' 
+            src="https://api.qrserver.com/v1/create-qr-code/?data=lntb1u1pdn224rpp5ztqyrdeflryvjhvcskddh256th57v2kyeujex6fqy5rak7sgr2cqdq9wdjxzcqzys5zvyhllrcfd7gffj945upyfed20uk7xl200tv2xaatpndphe6ghk2z3cyr3jxnvmath8gasqnshh37ctys5vrulpvemvpf9duhvqe7gqyh0npv&amp;size=256x256" 
+            alt="" 
+            title="invoice" 
+            width="256" 
+            height="256" />
+            </slot>
+          </div>
+
+          <div class="modal-footer">
+            <slot name="footer">
+                <div id="invoice" style="height:100px">
+                    Invoice: lntb1u1pdn224rpp5ztqyrdeflryvjhvcskddh256th57v2kyeujex6fqy5rak7sgr2cqdq9wdjxzcqzys5zvyhllrcfd7gffj945upyfed20uk7xl200tv2xaatpndphe6ghk2z3cyr3jxnvmath8gasqnshh37ctys5vrulpvemvpf9duhvqe7gqyh0npv
+                </div>
+              <button class="modal-default-button" @click="$emit('close')">
+                OK
+              </button>
+              <button class="modal-default-button" @click="vm1.getInvoice()">
+                Request invoice
+              </button>
+            </slot>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+</script>
+
+<main id="app">
+    <header>
+        <nav>
+            <div class="nav-wrapper">
+                <div class="brand-logo left" id="payed_amout">
+                    Wallet: 0 sat
+                </div>
+                <a href="/public" class="brand-logo right">Lightning Chat</a>
+            </div>
+        </nav>
+    </header>
+    <div class="top">
+
+    </div>
+    <div class="row">
+        <div class="col s12">
+            <div class="card horizontal">
+                <div id="chat-messages" class="card-content" v-html="chatContent">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" v-if="joined">
+        <div class="input-field col s8">
+            <input type="text" v-model="newMsg" @keyup.enter="send">
+        </div>
+        <div class="input-field col s4">
+            <button class="waves-effect waves-light btn" @click="send">
+                <i class="material-icons right">chat</i>
+                Sends
+            </button>
+
+              <button class="waves-effect waves-light btn" id="show-modal" @click="showModal = true">Pay invoice</button>
+              <!-- use the modal component, pass in the prop -->
+              <modal v-if="showModal" @close="showModal = false">
+              <script>
+              //getInvoice();
+              </script>
+                <!--
+                  you can use custom content here to overwrite
+                  default content
+                -->
+              </modal>
+        </div>
+    </div>
+    <div class="row" v-if="!joined">
+        <div class="input-field col s8">
+            <input type="email" v-model.trim="email" placeholder="Email">
+        </div>
+        <div class="input-field col s8">
+            <input type="text" v-model.trim="username" placeholder="Username">
+        </div>
+        <div class="input-field col s4">
+            <button class="waves-effect waves-light btn" @click="join()">
+                <i class="material-icons right">done</i>
+                Join
+            </button>
+        </div>
+    </div>
+</main>
+
+<footer class="page-footer">
+</footer>
+
+<script src="https://unpkg.com/vue@2.1.3/dist/vue.min.js"></script>
+<script src="https://cdn.jsdelivr.net/emojione/2.2.6/lib/js/emojione.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/modal_comp.js"></script>
+</body>
+</html>
