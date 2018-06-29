@@ -35,7 +35,7 @@
 
           <div class="modal-body">
             <slot name="body">
-              <img id='barcode' 
+              <img id='barcode'
             src="https://api.qrserver.com/v1/create-qr-code/?data=lntb1u1pdn224rpp5ztqyrdeflryvjhvcskddh256th57v2kyeujex6fqy5rak7sgr2cqdq9wdjxzcqzys5zvyhllrcfd7gffj945upyfed20uk7xl200tv2xaatpndphe6ghk2z3cyr3jxnvmath8gasqnshh37ctys5vrulpvemvpf9duhvqe7gqyh0npv&amp;size=256x256" 
             alt="" 
             title="invoice" 
@@ -46,11 +46,10 @@
 
           <div class="modal-footer">
             <slot name="footer">
-                <div id="invoice" style="height:100px">
-                    Invoice: lntb1u1pdn224rpp5ztqyrdeflryvjhvcskddh256th57v2kyeujex6fqy5rak7sgr2cqdq9wdjxzcqzys5zvyhllrcfd7gffj945upyfed20uk7xl200tv2xaatpndphe6ghk2z3cyr3jxnvmath8gasqnshh37ctys5vrulpvemvpf9duhvqe7gqyh0npv
-                </div>
+                <textarea id="invoice" style="height:50px" placeholder="invoice..."></textarea>
+
               <button class="modal-default-button" @click="$emit('close')">
-                OK
+                Close
               </button>
               <button class="modal-default-button" @click="vm1.getInvoice()">
                 Request invoice
@@ -99,7 +98,6 @@
               <!-- use the modal component, pass in the prop -->
               <modal v-if="showModal" @close="showModal = false">
               <script>
-              //getInvoice();
               </script>
                 <!--
                   you can use custom content here to overwrite

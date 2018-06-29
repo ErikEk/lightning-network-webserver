@@ -20,11 +20,14 @@ var vm1 = new Vue({
         this.ws = new WebSocket('ws://' + window.location.host + '/ws');
         this.ws.addEventListener('message', function(e) {
             var msg = JSON.parse(e.data);
-            console.log(msg)
             if (msg.payed == "True") {
                 document.getElementById('payed_amout').style.backgroundColor = "darkgreen";
                 console.log(msg.value)
-                document.title = document.title + " " + msg.value;
+
+                document.getElementById('payed_amout').innerHTML = "Wallet: " + msg.value + " sat";
+                self.value = msg.value
+                
+                showModal = false;
                 return
             }
             else if (msg.message != "") {
@@ -48,7 +51,11 @@ var vm1 = new Vue({
     methods: {
         send: function () {
             if (this.newMsg != '') {
-                
+                console.log(this.value)
+                if(this.value <= 0) {
+                    Materialize.toast('Need more money', 2000);
+                    return;
+                }
                 this.ws.send(
                     JSON.stringify({
                         email: this.email,
@@ -56,6 +63,9 @@ var vm1 = new Vue({
                         message: $('<p>').html(this.newMsg).text() // Strip out html
                     }
                 ));
+                this.value = this.value - 1;
+                document.getElementById('payed_amout').innerHTML = "Wallet: " + this.value + " sat"
+
                 this.newMsg = ''; // Reset newMsg
             }
         },
@@ -75,9 +85,7 @@ var vm1 = new Vue({
         getInvoice: function() {
             this.ws.send(
                 JSON.stringify({
-                    email: "ereer",
                     askforinvoice: "5",
-                    username: "g",
                 }
             ));
         },

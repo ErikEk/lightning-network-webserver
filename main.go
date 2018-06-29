@@ -11,6 +11,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"strings"
+	"strconv"
 	"net/http"
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
@@ -48,7 +49,17 @@ var (
 	defaultRPCServer    = "localhost:10009"
 	defaultPort         = 8080
 )
-var clients = make(map[*websocket.Conn]bool) // connected clients
+
+var newinvoice = ""
+var money = 0
+
+type clientss struct {
+	active	bool
+	money 	int
+}
+var clients = map[*websocket.Conn]*clientss{}
+//var clients_money = make(map[*websocket.Conn]int)
+//var clients = make(map[*websocket.Conn]bool) // connected clients
 var broadcast = make(chan Message)           // broadcast channel
 // Define our message object
 type Message struct {
@@ -229,20 +240,26 @@ func main() {
 		// Websockets
 		http.HandleFunc("/ws", handleConnections)
 
+		// reset money
+		money = 0
+
 		go func() {
 			for {
-				time.Sleep(time.Second * 5)
-				//eventString := fmt.Sprintf("the time is %v", time.Now())
-				log.Println("Receiving event")
-				payed, _ := checkPayments()
-				//fmt.Println(value)
-				msg := Message{Payed: "False", Value: "5"}
-				if(payed == true) {
-					msg = Message{Payed: "True", Value: "5"}
-				}
-
+				
+				time.Sleep(time.Second * 4)
+				msg := Message{}
+				
 				for client := range clients {
-					fmt.Println(msg)
+
+					if(newinvoice != "") {
+						payed, _ := checkPayments(newinvoice)
+						if(payed == true) {
+							clients[client].money = clients[client].money + 5
+							msg = Message{Payed: "True", Value: strconv.Itoa(clients[client].money)}
+							newinvoice = ""
+						}
+					}
+
 					err := client.WriteJSON(msg)
 					if err != nil {
 						log.Printf("error: %v", err)
@@ -273,6 +290,7 @@ func handleMessages() {
 		
 		// Send it out to every client that is currently connected
 		for client := range clients {
+			
 			err := client.WriteJSON(msg)
 			if err != nil {
 				log.Printf("error: %v", err)
@@ -293,7 +311,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	defer ws.Close()
 
 	// Register our new client
-	clients[ws] = true
+	clients[ws] = &clientss{active: true, money:0}
 	for {
 		var msg Message
 		// Read in a new message as JSON and map it to a Message object
@@ -303,10 +321,14 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			delete(clients, ws)
 			break
 		}
+		if (msg.Message != ""){
+			money = money - 1
+		}
 		if (msg.AskForInvoice == "5") {
 			p,_ := loadInvoiceData(w,r,"To Lightning Chat", 5)
 			fmt.Println(p.Invoice)
 			msg.AskForInvoice = p.Invoice
+			newinvoice = p.Invoice
 		}
 
 		// Send the newly received message to the broadcast channel

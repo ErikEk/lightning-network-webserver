@@ -9,7 +9,7 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"golang.org/x/net/context"
 )
-
+/*
 func watchPayments() {
 	//TODO: A better way is to watch for payments and then
 	// update firebase.
@@ -23,10 +23,10 @@ func watchPayments() {
 		}
 	}()
 }
+*/
 
 
-
-func checkPayments() (payed bool, value int64){
+func checkPayments(invoice string) (payed bool, value int64){
 	c, clean := getClient()
 	defer clean()
 
@@ -39,7 +39,6 @@ func checkPayments() (payed bool, value int64){
 	//}
 	//for _, s := range snapshot {
 		//invoice := s.Data()["invoice"].(string)
-	invoice := "lntb1u1pdnzhlfpp5v46meavv4ednpsqqxuxy3zu9c3my5vzyhpgtwueul9ykczyvw6vqdq9wdjxzcqzyshg47ff98ysp50cg2h73648mzth4wq0r54auy0tm7g64pv8mk4uws0gfprldlhjsql5av8c8kf636udd7thkatsflr99j8cwk55muccsqf257c4"
 	
 	decoded, err := c.DecodePayReq(context.Background(), &lnrpc.PayReqString{PayReq: invoice})
 	res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
