@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 	"os/user"
 	"path/filepath"
 	"strings"
@@ -24,6 +25,7 @@ import (
 	macaroon "gopkg.in/macaroon.v2"
 	"html/template"
 	//"google.golang.org/api/option"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -45,10 +47,24 @@ var (
 	defaultMacaroonPath = filepath.Join(defaultLndDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
 	defaultPort         = 8080
-
-
 )
-
+var clients = make(map[*websocket.Conn]bool) // connected clients
+var broadcast = make(chan Message)           // broadcast channel
+// Define our message object
+type Message struct {
+	Email         string `json:"email"`
+	Username      string `json:"username"`
+	Message  	  string `json:"message"`
+	Payed	 	  string `json:"payed"`
+	Value    	  string `json:"value"`
+    AskForInvoice string `json:"askforinvoice"`
+}
+// Configure the upgrader
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
 func fatal(err error) {
 	fmt.Fprintf(os.Stderr, "[LNSite] %v\n", err)
 	os.Exit(1)
@@ -170,32 +186,9 @@ func main() {
 		fatal(err)
 	}*/
 
-	watchPayments()
+	
+	//watchPayments()
 
-	/*
-	api := rest.NewApi()
-	api.Use(rest.DefaultDevStack...)
-	api.Use(&rest.CorsMiddleware{
-		RejectNonCorsRequests: false,
-		OriginValidator: func(origin string, request *rest.Request) bool {
-			return true
-		},
-		AllowedMethods: []string{"GET", "POST", "PUT"},
-		AllowedHeaders: []string{
-			"Accept", "Content-Type", "X-Custom-Header", "Origin"},
-		AccessControlAllowCredentials: true,
-		AccessControlMaxAge:           3600,
-	})
-	router, err := rest.MakeRouter(
-		rest.Get("/pubkey", getPubkey),
-		rest.Get("/invoice/:memo", getInvoice),
-		//rest.Get("/html", TodoIndex),
-	)
-	if err != nil {
-		fatal(err)
-	}
-	api.SetApp(router)
-	*/
 	
 	if httpsEnabled {
 	}
@@ -223,23 +216,113 @@ func main() {
 	*/
 
 	if httpEnabled {
-		mux := http.NewServeMux()
-		mux.HandleFunc("/", getIndex)
-		mux.HandleFunc("/invoice", getInvoice)
+
+		fs := http.FileServer(http.Dir("./public"))
+		http.Handle("/public/", http.StripPrefix("/public/",fs))
+		
+		fs = http.FileServer(http.Dir("./js"))
+		http.Handle("/js/", http.StripPrefix("/js", fs))
+
+		fs = http.FileServer(http.Dir("./css"))
+		http.Handle("/css/", http.StripPrefix("/css", fs))
+
+		// Websockets
+		http.HandleFunc("/ws", handleConnections)
+
+		go func() {
+			for {
+				time.Sleep(time.Second * 5)
+				//eventString := fmt.Sprintf("the time is %v", time.Now())
+				log.Println("Receiving event")
+				payed, _ := checkPayments()
+				//fmt.Println(value)
+				msg := Message{Payed: "False", Value: "5"}
+				if(payed == true) {
+					msg = Message{Payed: "True", Value: "5"}
+				}
+
+				for client := range clients {
+					fmt.Println(msg)
+					err := client.WriteJSON(msg)
+					if err != nil {
+						log.Printf("error: %v", err)
+						client.Close()
+						delete(clients, client)
+					}
+				}
+			}
+		}()
+
+		go handleMessages()
+
+		http.HandleFunc("/", getIndex)
+		http.HandleFunc("/invoice", getInvoice)
 		fileServer := http.FileServer(http.Dir("./images"))
-		mux.Handle("/images/", http.StripPrefix("/images", fileServer))
+		http.Handle("/images/", http.StripPrefix("/images", fileServer))
+
 		log.Println("Starting server on :8080")
-		err := http.ListenAndServe(":8080", mux)
+		err := http.ListenAndServe(":8080", nil)
 		log.Fatal(err)
 	}
 }
+func handleMessages() {
+	for {
+		// Grab the next message from the broadcast channel
+		msg := <-broadcast
+
+		
+		// Send it out to every client that is currently connected
+		for client := range clients {
+			err := client.WriteJSON(msg)
+			if err != nil {
+				log.Printf("error: %v", err)
+				client.Close()
+				delete(clients, client)
+			}
+		}
+	}
+}
+
+func handleConnections(w http.ResponseWriter, r *http.Request) {
+	// Upgrade initial GET request to a websocket
+	ws, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Make sure we close the connection when the function returns
+	defer ws.Close()
+
+	// Register our new client
+	clients[ws] = true
+	for {
+		var msg Message
+		// Read in a new message as JSON and map it to a Message object
+		err := ws.ReadJSON(&msg)
+		if err != nil {
+			log.Printf("error: %v", err)
+			delete(clients, ws)
+			break
+		}
+		if (msg.AskForInvoice == "5") {
+			p,_ := loadInvoiceData(w,r,"To Lightning Chat", 5)
+			fmt.Println(p.Invoice)
+			msg.AskForInvoice = p.Invoice
+		}
+
+		// Send the newly received message to the broadcast channel
+		broadcast <- msg
+	}
+}
+
 func getIndex(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("getIndex...")
 	p, _ := loadIndexData(w,r)
-    t, _ := template.ParseFiles("templates/testtemplate.html")
+	fmt.Println(p)
+    t, _ := template.ParseFiles("./templates/testtemplate.html")
     t.Execute(w, p)
 }
 func getInvoice(w http.ResponseWriter, r *http.Request) {
-	p, _ := loadInvoiceData(w,r)
+	p, _ := loadInvoiceData(w,r,"To Lightning Chat", 5)
     t, _ := template.ParseFiles("templates/getInvoice.html")
     t.Execute(w, p)
 }

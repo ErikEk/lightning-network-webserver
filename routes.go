@@ -62,12 +62,12 @@ func loadIndexData(w http.ResponseWriter, r *http.Request) (*IndexPage, error) {
 
     return &IndexPage{PubKey: res.GetIdentityPubkey(),NodeUri: res.GetUris()[0]}, nil
 }
-func loadInvoiceData(w http.ResponseWriter, r *http.Request) (*getInvoicePage, error) {
+func loadInvoiceData(w http.ResponseWriter, r *http.Request,memo string,value int64) (*getInvoicePage, error) {
 	c, clean := getClient()
 	defer clean()
 	res, err := c.AddInvoice(context.Background(), &lnrpc.Invoice{
-		Memo:  "sda",
-		Value: 100,
+		Memo:  memo,
+		Value: value,
 	})
 	if err != nil {
 		//w.WriteJson(map[string]string{"error": err.Error()})

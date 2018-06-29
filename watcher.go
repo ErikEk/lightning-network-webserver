@@ -10,11 +10,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-type Message struct {
-	Invoice string `json:"invoice,omitempty"`
-	Settled bool   `json:"settled,omitempty"`
-}
-
 func watchPayments() {
 	//TODO: A better way is to watch for payments and then
 	// update firebase.
@@ -31,7 +26,7 @@ func watchPayments() {
 
 
 
-func checkPayments() {
+func checkPayments() (payed bool, value int64){
 	c, clean := getClient()
 	defer clean()
 
@@ -44,7 +39,7 @@ func checkPayments() {
 	//}
 	//for _, s := range snapshot {
 		//invoice := s.Data()["invoice"].(string)
-	invoice := "lntb1u1pdjhu85pp54syzp8ppm3ax0xprctgl0lf6ztss4zfykmgffan8c7wwgnathahqdq9wdjxzcqzyschmd8lft5kjfjs4k6w3075f5vuah3aeksju336nmt8nume2vepkjh4hw7yc50kn6t7v7syqyl64s5vsqrq8vrwmpcwnvw3udugustvgq94uwes"
+	invoice := "lntb1u1pdnzhlfpp5v46meavv4ednpsqqxuxy3zu9c3my5vzyhpgtwueul9ykczyvw6vqdq9wdjxzcqzyshg47ff98ysp50cg2h73648mzth4wq0r54auy0tm7g64pv8mk4uws0gfprldlhjsql5av8c8kf636udd7thkatsflr99j8cwk55muccsqf257c4"
 	
 	decoded, err := c.DecodePayReq(context.Background(), &lnrpc.PayReqString{PayReq: invoice})
 	res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
@@ -64,6 +59,7 @@ func checkPayments() {
 	}
 
 	fmt.Println("--",lnInvoice.GetSettled())
+	fmt.Println("--",lnInvoice.GetValue())
 	//fmt.Println(lnInvoice)
 	//fmt.Println(lnInvoice.GetValue())
 	//fmt.Println(lnInvoice.GetPaymentRequest())
@@ -89,4 +85,6 @@ func checkPayments() {
 	*/
 	
 	//}
+
+	return lnInvoice.GetSettled(), lnInvoice.GetValue()
 }
