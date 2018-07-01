@@ -1,7 +1,6 @@
 package main
 
 import (
-	//"crypto/tls"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -48,19 +47,18 @@ var (
 	defaultMacaroonPath = filepath.Join(defaultLndDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
 	defaultPort         = 8080
+	newinvoice 			= ""
 )
 
-var newinvoice = ""
-var money = 0
 
 type clientss struct {
 	active	bool
 	money 	int
 }
 var clients = map[*websocket.Conn]*clientss{}
-//var clients_money = make(map[*websocket.Conn]int)
-//var clients = make(map[*websocket.Conn]bool) // connected clients
-var broadcast = make(chan Message)           // broadcast channel
+
+var broadcast = make(chan Message)      // broadcast channel
+
 // Define our message object
 type Message struct {
 	Email         string `json:"email"`
@@ -240,12 +238,14 @@ func main() {
 		// Websockets
 		http.HandleFunc("/ws", handleConnections)
 
-		// reset money
-		money = 0
+		http.HandleFunc("/", getIndex)
+		http.HandleFunc("/invoice", getInvoice)
+
+		fileServer := http.FileServer(http.Dir("./images"))
+		http.Handle("/images/", http.StripPrefix("/images", fileServer))
 
 		go func() {
 			for {
-				
 				time.Sleep(time.Second * 4)
 				msg := Message{}
 				
@@ -272,11 +272,6 @@ func main() {
 
 		go handleMessages()
 
-		http.HandleFunc("/", getIndex)
-		http.HandleFunc("/invoice", getInvoice)
-		fileServer := http.FileServer(http.Dir("./images"))
-		http.Handle("/images/", http.StripPrefix("/images", fileServer))
-
 		log.Println("Starting server on :8080")
 		err := http.ListenAndServe(":8080", nil)
 		log.Fatal(err)
@@ -300,7 +295,6 @@ func handleMessages() {
 		}
 	}
 }
-
 func handleConnections(w http.ResponseWriter, r *http.Request) {
 	// Upgrade initial GET request to a websocket
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -357,16 +351,13 @@ func cleanAndExpandPath(path string) string {
 	// Expand initial ~ to OS specific home directory.
 	if strings.HasPrefix(path, "~") {
 		var homeDir string
-
 		user, err := user.Current()
 		if err == nil {
 			homeDir = user.HomeDir
 		} else {
 			homeDir = os.Getenv("HOME")
 		}
-
 		path = strings.Replace(path, "~", homeDir, 1)
 	}
-
 	return filepath.Clean(os.ExpandEnv(path))
 }
