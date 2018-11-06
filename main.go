@@ -14,7 +14,6 @@ import (
 	"net/http"
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
-	//"github.com/ant0ine/go-json-rest/rest"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/macaroons"
 	"github.com/roasbeef/btcutil"
