@@ -2,12 +2,14 @@ package main
 
 import (
 	//"github.com/ant0ine/go-json-rest/rest"
-	"github.com/lightningnetwork/lnd/lnrpc"
-	"golang.org/x/net/context"
-	qrcode "github.com/skip2/go-qrcode"
-	"net/http"
 	"fmt"
+	"net/http"
+
+	"github.com/lightningnetwork/lnd/lnrpc"
+	qrcode "github.com/skip2/go-qrcode"
+	"golang.org/x/net/context"
 )
+
 /*func showPubkey(w http.ResponseWriter, r *http.Request) {
 	c, clean := getClient()
 	defer clean()
@@ -29,12 +31,13 @@ import (
 	fmt.Fprintf(w, "<h1>%s</h1><h1>%s</h1>", res.GetIdentityPubkey(), res.GetUris()[0])
 }*/
 type IndexPage struct {
-    PubKey string
-    NodeUri string
+	PubKey  string
+	NodeUri string
 }
 type getInvoicePage struct {
-    Invoice string
+	Invoice string
 }
+
 func loadIndexData(w http.ResponseWriter, r *http.Request) (*IndexPage, error) {
 	c, clean := getClient()
 	defer clean()
@@ -45,21 +48,21 @@ func loadIndexData(w http.ResponseWriter, r *http.Request) (*IndexPage, error) {
 		//return
 	}
 
-    /*if false {
- 	   filename := title + ".txt"
-    	body, err := ioutil.ReadFile(filename)
-	    imageur := "images/qr.png"
-	    if err != nil {
-	        return nil, err
-	    }
-	    //return &Page{Title: title, Body: body, Imageurl: imageur}, nil
-	}
+	/*if false {
+	 	   filename := title + ".txt"
+	    	body, err := ioutil.ReadFile(filename)
+		    imageur := "images/qr.png"
+		    if err != nil {
+		        return nil, err
+		    }
+		    //return &Page{Title: title, Body: body, Imageurl: imageur}, nil
+		}
 	*/
-	nodeuri := res.GetUris()[0]
+	//nodeuri := res.GetUris()[0]
 
-    return &IndexPage{PubKey: res.GetIdentityPubkey(),NodeUri: res.GetUris()[0]}, nil
+	return &IndexPage{PubKey: res.GetIdentityPubkey(), NodeUri: res.GetUris()[0]}, nil
 }
-func loadInvoiceData(w http.ResponseWriter, r *http.Request,memo string,value int64) (*getInvoicePage, error) {
+func loadInvoiceData(w http.ResponseWriter, r *http.Request, memo string, value int64) (*getInvoicePage, error) {
 	c, clean := getClient()
 	defer clean()
 	res, err := c.AddInvoice(context.Background(), &lnrpc.Invoice{
@@ -74,5 +77,5 @@ func loadInvoiceData(w http.ResponseWriter, r *http.Request,memo string,value in
 
 	err = qrcode.WriteFile(invoicedata, qrcode.Medium, 256, "images/qr.png")
 
-    return &getInvoicePage{Invoice: invoicedata}, nil
+	return &getInvoicePage{Invoice: invoicedata}, nil
 }

@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	//"log"
-	"time"
+	//"time"
 	"reflect"
 	//"cloud.google.com/go/firestore"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"golang.org/x/net/context"
 )
+
 /*
 func watchPayments() {
 	//TODO: A better way is to watch for payments and then
@@ -25,8 +26,7 @@ func watchPayments() {
 }
 */
 
-
-func checkPayments(invoice string) (payed bool, value int64){
+func checkPayments(invoice string) (payed bool, value int64) {
 	c, clean := getClient()
 	defer clean()
 
@@ -38,8 +38,8 @@ func checkPayments(invoice string) (payed bool, value int64){
 	//	return
 	//}
 	//for _, s := range snapshot {
-		//invoice := s.Data()["invoice"].(string)
-	
+	//invoice := s.Data()["invoice"].(string)
+
 	decoded, err := c.DecodePayReq(context.Background(), &lnrpc.PayReqString{PayReq: invoice})
 	res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
 	fmt.Println(res)
@@ -49,14 +49,14 @@ func checkPayments(invoice string) (payed bool, value int64){
 		fmt.Println("Failed to decode payreq")
 		//continue
 	}
-	
+
 	lnInvoice, err := c.LookupInvoice(context.Background(), &lnrpc.PaymentHash{RHashStr: decoded.GetPaymentHash()})
 	if err != nil {
 		// It's possible that invoice generated with a test lnd won't appear in prod lnd.
 		// Best approach is to separate them in the DB, but for now, just ignore them.
 		fmt.Println("Failed to find invoice ", err)
 	}
-	
+
 	/*if err != nil {
 		// It's possible that invoice generated with a test lnd won't appear in prod lnd.
 		// Best approach is to separate them in the DB, but for now, just ignore them.

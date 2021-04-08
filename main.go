@@ -5,25 +5,29 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
-	"time"
 	"os/user"
 	"path/filepath"
-	"strings"
 	"strconv"
-	"net/http"
+	"strings"
+	"time"
+
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/macaroons"
+
 	//"github.com/roasbeef/btcutil"
 	//"github.com/btcsuite/btcutil"
 	//"golang.org/x/crypto/acme/autocert"
 	//"golang.org/x/net/context"
+	"html/template"
+
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	macaroon "gopkg.in/macaroon.v2"
-	"html/template"
+
 	//"google.golang.org/api/option"
 	"github.com/gorilla/websocket"
 )
@@ -31,11 +35,11 @@ import (
 const (
 	defaultTLSCertFilename  = "tls.cert"
 	defaultMacaroonFilename = "admin.macaroon"
-	
 )
+
 var (
-	newinvoice = ""
-	tpl *template.Template
+	newinvoice  = ""
+	tpl         *template.Template
 	tlsCert     string
 	rpcMacaroon string
 	rpcServer   = defaultRPCServer
@@ -45,38 +49,40 @@ var (
 	firebaseDb  *firestore.Client
 
 	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
-	defaultLndDir	      = "/home/pi/.lnd/"
-	defaultLndDataDir = "/home/pi/.lnd/data/chain/bitcoin/mainnet"
+	defaultLndDir       = "/home/pi/.lnd/"
+	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet"
 	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
 	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
 	defaultPort         = 80
 )
 
-
 type clientss struct {
-	active	bool
-	money 	int
+	active bool
+	money  int
 }
+
 var clients = map[*websocket.Conn]*clientss{}
 
-var broadcast = make(chan Message)      // broadcast channel
+var broadcast = make(chan Message) // broadcast channel
 
 // Define our message object
 type Message struct {
 	Email         string `json:"email"`
 	Username      string `json:"username"`
-	Message  	  string `json:"message"`
-	Payed	 	  string `json:"payed"`
-	Value    	  string `json:"value"`
-    AskForInvoice string `json:"askforinvoice"`
+	Message       string `json:"message"`
+	Payed         string `json:"payed"`
+	Value         string `json:"value"`
+	AskForInvoice string `json:"askforinvoice"`
 }
+
 // Configure the upgrader
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
 }
+
 func fatal(err error) {
 	fmt.Fprintf(os.Stderr, "[LNSite] %v\n", err)
 	os.Exit(1)
@@ -169,7 +175,6 @@ func getClientConn() *grpc.ClientConn {
 	return conn
 }
 
-
 func main() {
 
 	tlsCertFlag := flag.String("tlsCert", defaultTLSCertPath, "path for the certificate used by the lnd server.")
@@ -198,40 +203,38 @@ func main() {
 		fatal(err)
 	}*/
 
-	
 	//watchPayments()
 
-	
 	if httpsEnabled {
 	}
 	/*
-	if httpsEnabled {
-		certManager := autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist("chat-backend.rawtx.com"),
-			Cache:      autocert.DirCache(filepath.Join(cleanAndExpandPath("~"), "certs")),
-		}
+		if httpsEnabled {
+			certManager := autocert.Manager{
+				Prompt:     autocert.AcceptTOS,
+				HostPolicy: autocert.HostWhitelist("chat-backend.rawtx.com"),
+				Cache:      autocert.DirCache(filepath.Join(cleanAndExpandPath("~"), "certs")),
+			}
 
-		server := &http.Server{
-			Addr: ":https",
-			TLSConfig: &tls.Config{
-				GetCertificate: certManager.GetCertificate,
-			},
-			Handler: api.MakeHandler(),
-		}
+			server := &http.Server{
+				Addr: ":https",
+				TLSConfig: &tls.Config{
+					GetCertificate: certManager.GetCertificate,
+				},
+				Handler: api.MakeHandler(),
+			}
 
-		go http.ListenAndServe(":http", certManager.HTTPHandler(nil))
-		log.Fatal(server.ListenAndServeTLS("", ""))
-	} else {
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), api.MakeHandler()))
-	}
+			go http.ListenAndServe(":http", certManager.HTTPHandler(nil))
+			log.Fatal(server.ListenAndServeTLS("", ""))
+		} else {
+			log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", listenPort), api.MakeHandler()))
+		}
 	*/
 
 	if httpEnabled {
 
 		fs := http.FileServer(http.Dir("./public"))
-		http.Handle("/public/", http.StripPrefix("/public/",fs))
-		
+		http.Handle("/public/", http.StripPrefix("/public/", fs))
+
 		fs = http.FileServer(http.Dir("./js"))
 		http.Handle("/js/", http.StripPrefix("/js", fs))
 
@@ -251,12 +254,12 @@ func main() {
 			for {
 				time.Sleep(time.Second * 4)
 				msg := Message{}
-				
+
 				for client := range clients {
 
-					if(newinvoice != "") {
+					if newinvoice != "" {
 						payed, _ := checkPayments(newinvoice)
-						if(payed == true) {
+						if payed == true {
 							clients[client].money = clients[client].money + 5
 							msg = Message{Payed: "True", Value: strconv.Itoa(clients[client].money)}
 							newinvoice = ""
@@ -277,7 +280,7 @@ func main() {
 
 		http.HandleFunc("/", getIndex)
 		http.HandleFunc("/invoice", getInvoice)
-		fileServer := http.FileServer(http.Dir("./images"))
+		fileServer = http.FileServer(http.Dir("./images"))
 		http.Handle("/images/", http.StripPrefix("/images", fileServer))
 
 		log.Println("Starting server on :80")
@@ -291,10 +294,9 @@ func handleMessages() {
 		// Grab the next message from the broadcast channel
 		msg := <-broadcast
 
-		
 		// Send it out to every client that is currently connected
 		for client := range clients {
-			
+
 			err := client.WriteJSON(msg)
 			if err != nil {
 				log.Printf("error: %v", err)
@@ -314,7 +316,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	defer ws.Close()
 
 	// Register our new client
-	clients[ws] = &clientss{active: true, money:0}
+	clients[ws] = &clientss{active: true, money: 0}
 	for {
 		var msg Message
 		// Read in a new message as JSON and map it to a Message object
@@ -324,11 +326,11 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 			delete(clients, ws)
 			break
 		}
-		if (msg.Message != ""){
+		/*if msg.Message != "" { // DONT KNOW WHAT THIS DOES
 			money = money - 1
-		}
-		if (msg.AskForInvoice == "5") {
-			p,_ := loadInvoiceData(w,r,"To Lightning Chat", 5)
+		}*/
+		if msg.AskForInvoice == "5" {
+			p, _ := loadInvoiceData(w, r, "To Lightning Chat", 5)
 			fmt.Println(p.Invoice)
 			msg.AskForInvoice = p.Invoice
 			newinvoice = p.Invoice
@@ -341,19 +343,20 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 
 func getIndex(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("getIndex...")
-	p, _ := loadIndexData(w,r)
+	p, _ := loadIndexData(w, r)
 	fmt.Println(p)
-    t, _ := template.ParseFiles("./templates/testtemplate.html")
-    t.Execute(w, p)
+	t, _ := template.ParseFiles("./templates/testtemplate.html")
+	t.Execute(w, p)
 }
 func getInvoice(w http.ResponseWriter, r *http.Request) {
-	p, _ := loadInvoiceData(w,r,"To Lightning Chat", 5)
-    t, _ := template.ParseFiles("templates/getInvoice.html")
-    t.Execute(w, p)
+	p, _ := loadInvoiceData(w, r, "To Lightning Chat", 5)
+	t, _ := template.ParseFiles("templates/getInvoice.html")
+	t.Execute(w, p)
 }
 func init() {
 	tpl = template.Must(template.ParseGlob("templates/*.html"))
 }
+
 // cleanAndExpandPath expands environment variables and leading ~ in the
 // passed path, cleans the result, and returns it.
 func cleanAndExpandPath(path string) string {
