@@ -17,7 +17,7 @@ import (
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/macaroons"
 	//"github.com/roasbeef/btcutil"
-	"github.com/btcsuite/btcutil"
+	//"github.com/btcsuite/btcutil"
 	//"golang.org/x/crypto/acme/autocert"
 	//"golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
@@ -31,8 +31,10 @@ import (
 const (
 	defaultTLSCertFilename  = "tls.cert"
 	defaultMacaroonFilename = "admin.macaroon"
+	
 )
 var (
+	newinvoice = ""
 	tpl *template.Template
 	tlsCert     string
 	rpcMacaroon string
