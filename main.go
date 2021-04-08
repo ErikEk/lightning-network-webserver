@@ -16,7 +16,8 @@ import (
 	firebase "firebase.google.com/go"
 	"github.com/lightningnetwork/lnd/lnrpc"
 	"github.com/lightningnetwork/lnd/macaroons"
-	"github.com/roasbeef/btcutil"
+	//"github.com/roasbeef/btcutil"
+	"github.com/btcsuite/btcutil"
 	//"golang.org/x/crypto/acme/autocert"
 	//"golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
@@ -41,7 +42,7 @@ var (
 	firebaseApp *firebase.App
 	firebaseDb  *firestore.Client
 
-	defaultLndDir2       = btcutil.AppDataDir("lnd", false)
+	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
 	defaultLndDir	      = "/home/pi/.lnd/"
 	defaultLndDataDir = "/home/pi/.lnd/data/chain/bitcoin/mainnet"
 	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
