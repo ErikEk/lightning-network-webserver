@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	defaultTLSCertFilename  = "data/chain/bitcoin/mainnet/tls.cert"
+	defaultTLSCertFilename  = "tls.cert"
 	defaultMacaroonFilename = "data/chain/bitcoin/mainnet/admin.macaroon"
 )
 
@@ -42,7 +42,7 @@ var (
 	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
 	defaultLndDir       = "/home/pi/.lnd/"
 	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet/"
-	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
+	defaultTLSCertPath  = filepath.Join(defaultLndDir, defaultTLSCertFilename)
 	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
 	defaultPort         = 80
