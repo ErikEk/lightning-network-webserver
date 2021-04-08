@@ -43,11 +43,13 @@ var (
 	firebaseApp *firebase.App
 	firebaseDb  *firestore.Client
 
-	defaultLndDir       = btcutil.AppDataDir("lnd", false)
-	defaultTLSCertPath  = filepath.Join(defaultLndDir, defaultTLSCertFilename)
-	defaultMacaroonPath = filepath.Join(defaultLndDir, defaultMacaroonFilename)
+	defaultLndDir2       = btcutil.AppDataDir("lnd", false)
+	defaultLndDir	      = "/home/pi/.lnd/"
+	defaultLndDataDir = "/home/pi/.lnd/data/chain/bitcoin/mainnet"
+	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
+	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
-	defaultPort         = 8080
+	defaultPort         = 80
 )
 
 var newinvoice = ""
@@ -277,8 +279,8 @@ func main() {
 		fileServer := http.FileServer(http.Dir("./images"))
 		http.Handle("/images/", http.StripPrefix("/images", fileServer))
 
-		log.Println("Starting server on :8080")
-		err := http.ListenAndServe(":8080", nil)
+		log.Println("Starting server on :80")
+		err := http.ListenAndServe(":80", nil)
 		log.Fatal(err)
 	}
 }
