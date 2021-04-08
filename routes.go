@@ -7,8 +7,6 @@ import (
 	qrcode "github.com/skip2/go-qrcode"
 	"net/http"
 	"fmt"
-	//"io/ioutil"
-	//"reflect"
 )
 /*func showPubkey(w http.ResponseWriter, r *http.Request) {
 	c, clean := getClient()
@@ -58,7 +56,6 @@ func loadIndexData(w http.ResponseWriter, r *http.Request) (*IndexPage, error) {
 	}
 	*/
 	nodeuri := res.GetUris()[0]
-	fmt.Println(nodeuri)
 
     return &IndexPage{PubKey: res.GetIdentityPubkey(),NodeUri: res.GetUris()[0]}, nil
 }

@@ -56,17 +56,7 @@ func checkPayments(invoice string) (payed bool, value int64){
 		// Best approach is to separate them in the DB, but for now, just ignore them.
 		fmt.Println("Failed to find invoice ", err)
 	}
-
-	fmt.Println("--",lnInvoice.GetSettled())
-	fmt.Println("--",lnInvoice.GetValue())
-	//fmt.Println(lnInvoice)
-	//fmt.Println(lnInvoice.GetValue())
-	//fmt.Println(lnInvoice.GetPaymentRequest())
-	//fmt.Println()
 	
-	
-	t := time.Unix(lnInvoice.GetCreationDate(), 0)
-	fmt.Println(t)
 	/*if err != nil {
 		// It's possible that invoice generated with a test lnd won't appear in prod lnd.
 		// Best approach is to separate them in the DB, but for now, just ignore them.
@@ -82,8 +72,6 @@ func checkPayments(invoice string) (payed bool, value int64){
 		}
 	}
 	*/
-	
-	//}
 
 	return lnInvoice.GetSettled(), lnInvoice.GetValue()
 }
