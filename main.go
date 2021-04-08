@@ -33,11 +33,20 @@ import (
 )
 
 const (
-	defaultTLSCertFilename  = "tls.cert"
-	defaultMacaroonFilename = "admin.macaroon"
+	defaultTLSCertFilename  = "data/chain/bitcoin/mainnet/tls.cert"
+	defaultMacaroonFilename = "data/chain/bitcoin/mainnet/admin.macaroon"
 )
 
 var (
+
+	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
+	defaultLndDir       = "/home/pi/.lnd/"
+	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet/"
+	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
+	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
+	defaultRPCServer    = "localhost:10009"
+	defaultPort         = 80
+
 	newinvoice  = ""
 	tpl         *template.Template
 	tlsCert     string
@@ -47,14 +56,6 @@ var (
 	listenPort  = defaultPort
 	firebaseApp *firebase.App
 	firebaseDb  *firestore.Client
-
-	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
-	defaultLndDir       = "/home/pi/.lnd/"
-	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet/"
-	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
-	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
-	defaultRPCServer    = "localhost:10009"
-	defaultPort         = 80
 )
 
 type clientss struct {
@@ -117,7 +118,7 @@ func getClientConn() *grpc.ClientConn {
 			rpcMacaroon = filepath.Join(lndDir, defaultMacaroonFilename)
 		}
 	}
-
+	fmt.Println(tlsCert)
 	// Load the specified TLS certificate and build transport credentials
 	// with it.
 	tlsCertPath := cleanAndExpandPath(tlsCert)
@@ -130,7 +131,7 @@ func getClientConn() *grpc.ClientConn {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(creds),
 	}
-
+	fmt.Println(rpcMacaroon)
 	// Load the specified macaroon file.
 	macPath := cleanAndExpandPath(rpcMacaroon)
 	macBytes, err := ioutil.ReadFile(macPath)
