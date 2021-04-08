@@ -47,12 +47,7 @@ var (
 	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
 	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
-<<<<<<< HEAD
 	defaultPort         = 80
-=======
-	defaultPort         = 8080
-	newinvoice 			= ""
->>>>>>> a52a68dcc0f813972b76afe3f19054d630cf9660
 )
 
 
@@ -277,7 +272,6 @@ func main() {
 
 		go handleMessages()
 
-<<<<<<< HEAD
 		http.HandleFunc("/", getIndex)
 		http.HandleFunc("/invoice", getInvoice)
 		fileServer := http.FileServer(http.Dir("./images"))
@@ -285,10 +279,7 @@ func main() {
 
 		log.Println("Starting server on :80")
 		err := http.ListenAndServe(":80", nil)
-=======
-		log.Println("Starting server on :8080")
-		err := http.ListenAndServe(":8080", nil)
->>>>>>> a52a68dcc0f813972b76afe3f19054d630cf9660
+
 		log.Fatal(err)
 	}
 }
