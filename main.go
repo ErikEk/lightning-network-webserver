@@ -50,7 +50,7 @@ var (
 
 	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
 	defaultLndDir       = "/home/pi/.lnd/"
-	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet"
+	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet/"
 	defaultTLSCertPath  = filepath.Join(defaultLndDataDir, defaultTLSCertFilename)
 	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
@@ -278,10 +278,10 @@ func main() {
 
 		go handleMessages()
 
-		http.HandleFunc("/", getIndex)
-		http.HandleFunc("/invoice", getInvoice)
-		fileServer = http.FileServer(http.Dir("./images"))
-		http.Handle("/images/", http.StripPrefix("/images", fileServer))
+		//http.HandleFunc("/", getIndex)
+		//http.HandleFunc("/invoice", getInvoice)
+		//fileServer = http.FileServer(http.Dir("./images"))
+		//http.Handle("/images/", http.StripPrefix("/images", fileServer))
 
 		log.Println("Starting server on :80")
 		err := http.ListenAndServe(":80", nil)
