@@ -34,14 +34,14 @@ import (
 
 const (
 	defaultTLSCertFilename  = "tls.cert"
-	defaultMacaroonFilename = "data/chain/bitcoin/mainnet/admin.macaroon"
+	defaultMacaroonFilename = "data/chain/bitcoin/testnet/admin.macaroon"
 )
 
 var (
 
 	//defaultLndDir2       = btcutil.AppDataDir("lnd", false)
-	defaultLndDir       = "/home/pi/.lnd/"
-	defaultLndDataDir   = "/home/pi/.lnd/data/chain/bitcoin/mainnet/"
+	defaultLndDir       = "/home/erik/.lnd/"
+	defaultLndDataDir   = "/home/erik/.lnd/data/chain/bitcoin/testnet/"
 	defaultTLSCertPath  = filepath.Join(defaultLndDir, defaultTLSCertFilename)
 	defaultMacaroonPath = filepath.Join(defaultLndDataDir, defaultMacaroonFilename)
 	defaultRPCServer    = "localhost:10009"
@@ -247,6 +247,7 @@ func main() {
 
 		http.HandleFunc("/", getIndex)
 		http.HandleFunc("/invoice", getInvoice)
+		http.HandleFunc("/subscribe", getSubscribe)
 
 		fileServer := http.FileServer(http.Dir("./images"))
 		http.Handle("/images/", http.StripPrefix("/images", fileServer))
@@ -350,8 +351,13 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, p)
 }
 func getInvoice(w http.ResponseWriter, r *http.Request) {
-	p, _ := loadInvoiceData(w, r, "To Lightning Chat", 5)
+	p, _ := loadSubscribeData(w, r, "To Lightning Chat", 5)
 	t, _ := template.ParseFiles("templates/getInvoice.html")
+	t.Execute(w, p)
+}
+func getSubscribe(w http.ResponseWriter, r *http.Request) {
+	p, _ := loadSubscribeData(w, r, "To Lightning Chat", 5)
+	t, _ := template.ParseFiles("templates/getsubscribe.html")
 	t.Execute(w, p)
 }
 func init() {

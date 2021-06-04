@@ -79,3 +79,26 @@ func loadInvoiceData(w http.ResponseWriter, r *http.Request, memo string, value 
 
 	return &getInvoicePage{Invoice: invoicedata}, nil
 }
+
+func loadSubscribeData(w http.ResponseWriter, r *http.Request, memo string, value int64) (*getInvoicePage, error) {
+	c, clean := getClient()
+	defer clean()
+	res, err := c.AddInvoice(context.Background(), &lnrpc.Invoice{
+		Memo:  memo,
+		Value: value,
+	})
+	if err != nil {
+		//w.WriteJson(map[string]string{"error": err.Error()})
+		//return
+	}
+	invoicedata := res.PaymentRequest
+
+	//res, err := c.SubscribeInvoices(context.Background(), &lnrpc.InvoiceSubscription{})
+	if err != nil {
+		//w.WriteJson(map[string]string{"error": err.Error()})
+		//return
+	}
+
+	fmt.Println(invoicedata)
+	return &getInvoicePage{Invoice: invoicedata}, nil
+}
