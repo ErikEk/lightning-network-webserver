@@ -182,7 +182,7 @@ func main() {
 	rpcMacaroonFlag := flag.String("macaroon", defaultMacaroonPath, " path for the macaroon.")
 	rpcServerFlag := flag.String("rpcServer", defaultRPCServer, "rpc server to connect to.")
 	listenPortFlag := flag.Int("port", defaultPort, "port on which to listen for connections.")
-	httpsEnableFlag := flag.Bool("https", false, "enables https using autocert/letsencrypt.")
+	//httpsEnableFlag := flag.Bool("https", false, "enables https using autocert/letsencrypt.")
 	httpEnableFlag := flag.Bool("http", true, "enables https using autocert/letsencrypt.")
 	//firebaseCredsFlag := flag.String("firebaseCreds", "~/firebase.json", "serviceAccountKey.json for firebase.")
 	flag.Parse()
@@ -190,7 +190,7 @@ func main() {
 	rpcMacaroon = *rpcMacaroonFlag
 	rpcServer = *rpcServerFlag
 	listenPort = *listenPortFlag
-	httpsEnabled := *httpsEnableFlag
+	//httpsEnabled := *httpsEnableFlag
 	httpEnabled := *httpEnableFlag
 	/*firebaseCredsFile := cleanAndExpandPath(*firebaseCredsFlag)
 	opt := option.WithCredentialsFile(firebaseCredsFile)
@@ -206,8 +206,8 @@ func main() {
 
 	//watchPayments()
 
-	if httpsEnabled {
-	}
+	//if httpsEnabled {
+	//}
 	/*
 		if httpsEnabled {
 			certManager := autocert.Manager{
@@ -256,15 +256,17 @@ func main() {
 			for {
 				time.Sleep(time.Second * 4)
 				msg := Message{}
-
+				fmt.Println(".")
 				for client := range clients {
-
+					fmt.Println("ddd22")
 					if newinvoice != "" {
+						fmt.Println("----------------")
 						payed, _ := checkPayments(newinvoice)
 						if payed == true {
 							clients[client].money = clients[client].money + 5
 							msg = Message{Payed: "True", Value: strconv.Itoa(clients[client].money)}
 							newinvoice = ""
+							fmt.Println(msg)
 						}
 					}
 
@@ -292,6 +294,7 @@ func main() {
 	}
 }
 func handleMessages() {
+	fmt.Println("handleMessages")
 	for {
 		// Grab the next message from the broadcast channel
 		msg := <-broadcast
@@ -308,7 +311,9 @@ func handleMessages() {
 		}
 	}
 }
+
 func handleConnections(w http.ResponseWriter, r *http.Request) {
+	fmt.Print("___2___")
 	// Upgrade initial GET request to a websocket
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -316,7 +321,7 @@ func handleConnections(w http.ResponseWriter, r *http.Request) {
 	}
 	// Make sure we close the connection when the function returns
 	defer ws.Close()
-
+	fmt.Print("___")
 	// Register our new client
 	clients[ws] = &clientss{active: true, money: 0}
 	for {

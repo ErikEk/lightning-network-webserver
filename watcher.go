@@ -41,7 +41,13 @@ func checkPayments(invoice string) (payed bool, value int64) {
 	//invoice := s.Data()["invoice"].(string)
 
 	decoded, err := c.DecodePayReq(context.Background(), &lnrpc.PayReqString{PayReq: invoice})
+	if err != nil {
+		fmt.Print(err)
+	}
 	res, err := c.GetInfo(context.Background(), &lnrpc.GetInfoRequest{})
+	if err != nil {
+		fmt.Print(err)
+	}
 	fmt.Println(res)
 	fmt.Println(decoded.GetPaymentHash())
 	fmt.Println(reflect.TypeOf(decoded))
